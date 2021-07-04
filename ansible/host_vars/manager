@@ -1,0 +1,19 @@
+#####################
+#      PROXMOX      #
+#####################
+idlxc: "204"
+net_interfaces:
+  - id: "net0"
+    name: "eth0"
+    ip4: "172.16.133.200"
+    netmask4: "16"
+    gw4: "172.16.0.1"
+    bridge: "vmbr0"
+cores: "4"
+memory: "8192"
+disk: "50"
+
+#
+#Docker swarm
+##
+docker_manager_address: "172.16.133.200"

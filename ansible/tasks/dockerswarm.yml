@@ -1,0 +1,3 @@
+- name: Instalación del cluster de docker swarm junto con todas sus dependencias
+  include_role:
+    name: docker_swarm

@@ -1,0 +1,51 @@
+# tasks file
+---
+- name: check version support
+  fail:
+    msg: "HAProxy version {{ haproxy_version }} is not supported"
+  when: haproxy_version | string not in haproxy_versions_supported
+  tags:
+    - configuration
+    - haproxy-check-version-support
+
+- import_tasks: install.yml
+  tags:
+    - configuration
+    - haproxy-install
+
+- import_tasks: certificates.yml
+  tags:
+    - configuration
+    - haproxy-certificates
+
+- import_tasks: acl.yml
+  tags:
+    - configuration
+    - haproxy-acl
+
+- import_tasks: configuration.yml
+  tags:
+    - configuration
+    - haproxy-configuration
+
+- import_tasks: letsencrypt.yml
+  tags:
+    - configuration
+    - haproxy-letsencrypt
+
+- name: start and enable service
+  service:
+    name: haproxy
+    state: "{{ service_default_state | default('started') }}"
+    enabled: "{{ service_default_enabled | default(true) | bool }}"
+  tags:
+    - configuration
+    - haproxy-start-enable-service
+
+- name: Reinicio del servicio HAProxy
+  service:
+    name: haproxy
+    state: restarted
+  tags:
+    - certbot
+

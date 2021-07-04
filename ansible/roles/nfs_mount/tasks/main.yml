@@ -1,0 +1,25 @@
+---
+# tasks file for roles/nfs-mount
+- name: Actualizando librerias
+  apt:
+    update_cache: yes
+
+- name: Install NFS mount utility
+  apt:
+    pkg: nfs-common
+    state: present
+
+# Do not create mountpoint using file, the mount module will create it
+# automatically. This avoids problems where the module tries to change
+# permissions on an existing directory
+
+- name: Mount NFS share
+  mount:
+    fstype: nfs
+    name: "{{ item.path }}"
+    opts: "vers={{ nfs_version }},{{ item.opts | default(nfs_mount_opts) }}"
+    src: "{{ item.location }}"
+    dump: "{{ item.dump | default(omit) }}"
+    passno: "{{ item.passno | default(omit) }}"
+    state: "{{ item.state | default( 'mounted' ) }}"
+  with_items: "{{ nfs_share_mounts }}"

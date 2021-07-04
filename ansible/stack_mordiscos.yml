@@ -1,0 +1,106 @@
+#################
+# LISTA DE TAGS #
+#################
+# nfs: Exporta todos los directorios compartidos y monta los que debe montar
+# nfs_exports: Exporta todos los directorios compartidos
+# nfs_mounts: Monta todos los punto de montaje permitidos por las exportaciones
+# dns/bind: Instala bind9 y configura los dominios de las variables
+# certbot/letsencrypt: Certifica con letsencrypt mediante gestion los dominios agregados en las variables
+# haproxy/balanceadores: Instala haproxy en los grupos balanceadores con las distintas configuraciones
+# iptables/firewall: Configura el iptables de la maquina (permite por defecto el puerto 22)
+# mysql/databases: Configura el mysql en las maquinas en grupo databases
+# ntp/time: Instala un cliente ntp contra la zona de Europa-Madrid
+# heartbeat/vip: Instala heartbeat y configura las VIP
+# base: Instala paqueteria básica
+# docker/dockerswarm: Instala las dependencias de docker swarm y crea el cluster con el manager y los workers
+# nginx: Instala y configurar el servidor nginx para el mapeo UDP
+#
+##################
+# LISTA DE HOSTS #
+#################
+#- hosts: rebel_node
+#- hosts: rebel
+#- hosts: vulcan_node
+#- hosts: balanceadores
+#- hosts: balanceadores-privados
+#- hosts: balanceadores-publicos
+#- hosts: lb-publico-01
+#- hosts: dns-server
+- hosts: databases
+#- hosts: infraestructura
+#- hosts: nfs
+#- hosts: docker-cluster
+#- hosts: docker-workers
+#- hosts: nagios-server
+#- hosts: gestion
+#- hosts: all
+  tasks:
+    - include: tasks/iptables.yml
+      tags:
+        - firewall
+        - iptables
+      when: "'balanceadores-publicos' in group_names or 'manager' in inventory_hostname"
+    - include: tasks/heartbeat.yml
+      when: "'balanceadores-publicos' in group_names"
+      tags:
+        - heartbeat
+        - vip      
+    - include: tasks/heartbeat.yml
+      when: "'balanceadores-privados' in group_names or 'docker-cluster' in group_names"
+      tags:
+        - heartbeat
+        - vip      
+    - include: tasks/base.yml
+      tags:
+        - base
+      when: "'infraestructura' in group_names"
+    - include: tasks/ntp.yml
+      when: "'infraestructura' in group_names and 'gestion' not in group_names"
+      tags:
+        - time
+        - ntp
+    - include: tasks/nfs_exports.yml
+      when: "'nfs' in group_names"
+      tags:
+        - nfs_exports
+        - nfs
+    - include: tasks/nfs_mounts.yml
+      when: "'nfs' in group_names"
+      tags:
+        - nfs_mount
+        - nfs
+    - include: tasks/bind.yml
+      when: "'dns-server' in group_names"
+      tags:
+        - dns
+        - bind
+    - include: tasks/nginx.yml
+      when: "'balanceadores-publicos' in group_names"
+      tags:
+        - nginx
+    - include: tasks/haproxy.yml
+      when: "'balanceadores' in group_names"
+      tags:
+        - balanceadores
+        - haproxy
+#    - include: tasks/certbot.yml
+#      when: "'certbot' in group_names"
+#      tags:
+#        - certbot
+#        - letsencrypt
+    - include: tasks/mysql.yml
+      when: "'databases' in group_names or 'gestion' in group_names"
+      tags:
+        - databases
+        - mysql
+    - include: tasks/dockerswarm.yml
+      when: "'docker-cluster' in group_names"
+      tags:
+        - docker
+        - dockerswarm
+#    - include: tasks/docker-services.yml
+#      when: "'manager' in inventory_hostname"
+#      tags:
+#        - docker
+#        - dockerswarm
+#        - docker-services

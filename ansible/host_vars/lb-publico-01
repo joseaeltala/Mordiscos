@@ -1,0 +1,14 @@
+#####################
+#      PROXMOX      #
+#####################
+idlxc: "201"
+net_interfaces:
+  - id: "net0"
+    name: "eth0"
+    ip4: "172.16.133.33"
+    netmask4: "16"
+    gw4: "172.16.0.1"
+    bridge: "vmbr0"
+cores: "1"
+memory: "512"
+disk: "8"

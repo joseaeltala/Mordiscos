@@ -1,0 +1,111 @@
+#
+# HAPROXY
+###
+haproxy_frontend:
+
+  - name: dashboard
+    description: Dashboard de docker swarm
+    bind:
+      - listen: "0.0.0.0:9000"
+    default_backend: dashboard-docker
+
+  - name: http
+    description: Tráfico http
+    bind:
+      - listen: "0.0.0.0:80"
+    acl:
+      - string: url_certbot path_beg "/.well-known"
+    use_backend: 
+      - certbot if url_certbot
+    redirect:
+      - string: 'scheme https code 301'
+        cond: 'if ! url_certbot '
+
+  - name: https
+    description: Tráfico https
+    bind:
+      - listen: "0.0.0.0:443"
+        param:
+          - ssl
+          - 'crt /mnt/certificados/mordiscos/mordiscos.ovh.pem'
+    mode: http
+    acl:
+      - string: url_nagios path_beg "/nagios"
+      - string: acl_owncloud hdr(host) -i owncloud.mordiscos.ovh
+    use_backend: 
+      - nagios if url_nagios
+      - owncloud if acl_owncloud
+    default_backend: owncloud
+
+haproxy_backend:
+
+  - name: certbot
+    mode: http
+    balance: roundrobin
+    server:
+      - name: gestion
+        listen: "172.16.133.33:80"
+        param:
+          - check
+
+  - name: nagios
+    mode: http
+    balance: roundrobin
+    server:
+      - name: gestion
+        listen: "172.16.133.33:80"
+        param:
+          - check
+  
+  - name: owncloud
+    mode: http
+    balance: roundrobin
+    server:
+      - name: manager
+        listen: "172.16.133.200:8080"
+        param:
+          - check
+      - name: worker-01
+        listen: "172.16.133.201:8080"
+        param:
+          - check
+      - name: worker-02
+        listen: "172.16.133.202:8080"
+        param:
+          - check
+
+  - name: dashboard-docker
+    mode: http
+    balance: roundrobin
+    server:
+      - name: manager
+        listen: "172.16.133.200:9000"
+
+#
+# IPTABLES
+###
+firewall_policy_input: DROP
+firewall_allowed_tcp_ports:
+  - "22"
+  - "80"
+  - "443"
+  - "9000"
+  - "10011"
+  - "30033"
+firewall_allowed_udp_ports:
+  - "9987"
+#
+# NFS_MOUNT
+###
+nfs_share_mounts:
+    - path: /mnt/certificados/
+      location: 172.16.150.1:/md0/certificados
+#
+## HEARTBEAT
+####
+heartbeat_nodo_principal: lb-publico-01
+heartbeat_nodos_secundarios: 
+  - lb-publico-02
+heartbeat_vip: 172.16.133.35
+heartbeat_vip_netmask: 16
+heartbeat_vip_interface: eth0

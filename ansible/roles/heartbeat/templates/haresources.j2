@@ -1,0 +1,6 @@
+{{ heartbeat_nodo_principal }} {{ heartbeat_vip }}/{{ heartbeat_vip_netmask }}/{{ heartbeat_vip_interface }}
+{% if heartbeat_vip_gw is defined %}
+{{ heartbeat_nodo_principal }} {{ heartbeat_vip_gw}}/{{ heartbeat_vip_gw_netmask }}/{{ heartbeat_vip_gw_interface }}
+{% endif %} 
+
+

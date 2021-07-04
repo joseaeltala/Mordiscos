@@ -1,0 +1,36 @@
+---
+# Install Mysql
+- name: Configure system
+  include_tasks: '{{ platform }}'
+  with_first_found:
+    - 'setup-{{ ansible_os_family }}.yml'
+    - 'not-supported.yml'
+  loop_control:
+    loop_var: platform
+  when: "'databases' in group_names"
+
+# Configure MySQL.
+- name: Configure
+  include_tasks: configure.yml
+  when: "'databases' in group_names"
+
+- name: Run secure installation
+  include_tasks: secure-installation.yml
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+  when: "'databases' in group_names"
+
+- name: Create databases and users
+  include_tasks: databases_and_users.yml
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+  when: "'databases' in group_names"
+
+- name: Replicacion
+  include_tasks: replication.yml
+  when: "'databases' in group_names"
+
+#- name: Restore backups
+#  include_tasks: restore_backup.yml
+#  when: "'gestion' in group_names or 'db-privado-01' in inventory_hostname"
+

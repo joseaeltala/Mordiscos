@@ -1,0 +1,135 @@
+---
+- name: Actualizar la cache
+  apt:
+    update_cache: yes
+
+- name: Instalando vim en las maquinas
+  apt: 
+    name: "vim" 
+    update_cache: yes 
+    cache_valid_time: 86400 
+    state: present
+
+- name: Instalacion de sudo en las maquinas
+  apt:
+    name: "sudo"
+    update_cache: true
+    state: present
+
+- name: Instalacion de dnsutils en las maquinas
+  apt:
+    name: "dnsutils"
+    update_cache: true
+    state: present
+
+- name: Instalacion de curl en las maquinas
+  apt:
+    name: "curl"
+    update_cache: true
+    state: present
+
+- name: Instalacion de tree en las maquinas
+  apt:
+    name: "tree"
+    update_cache: true
+    state: present
+
+- name: Instalacion de net-tools en las maquinas
+  apt:
+    name: "net-tools"
+    update_cache: true
+    state: present
+
+- name: Añadir repositorio
+  apt_repository:
+    repo: deb http://archive.ubuntu.com/ubuntu bionic universe
+    state: present
+  when: 
+   - ansible_distribution == 'Ubuntu'
+   - "'gestion' in group_names"
+    
+- name: Instalacion de  mysql-apt-config
+  apt:
+    deb: https://dev.mysql.com/get/mysql-apt-config_0.8.16-1_all.deb
+  register: task_result
+  until: task_result is succeeded
+  when:
+   - mysql_default_daemon == 'mysqld'
+   - "'gestion' in group_names"
+
+- name: Añadir apt key Mysql
+  apt_key:
+    keyserver: '{{ mysql_default_apt_keyserver }}'
+    id: '{{ mysql_default_apt_key_id }}'
+    state: present
+  register: apt_key_install
+  until: apt_key_install is succeeded
+  when: "'gestion' in group_names"
+
+- name: Copiar mysql.list
+  template:
+    src: mysql.list.j2
+    dest: /etc/apt/sources.list.d/mysql.list
+    owner: root
+    group: root
+    mode: 0644
+  when: "'gestion' in group_names"
+
+- name: Instalacion de la version especifica de mysqlclient
+  apt:
+    name: "mysql-client=5.7*"
+    update_cache: true
+    state: present
+  when: "'gestion' in group_names"
+
+- name: Copiando archivos hosts
+  template:
+    src: hosts.j2
+    dest: /etc/hosts
+
+- name: Creando el directorio scripts
+  file:
+    path: /scripts/
+    owner: root
+    group: root
+    mode: '0770'
+    state: directory
+
+#- name: Copiando script heartbeat teamspeak
+#  copy:
+#    src: files/teamspeak_heartbeat.sh
+#    dest: /scripts/teamspeak_heartbeat.sh
+#    owner: root
+#    group: root
+#    mode: '0770'
+#  when: "'docker-cluster' in group_names"
+#
+#- name: Creando el cron del script heartbeat teamspeak
+#  shell: "echo \"@reboot root /bin/bash /scripts/teamspeak_heartbeat.sh\" >> /etc/crontab"
+#  when: "'docker-cluster' in group_names"
+#
+#- name: Ejecutando el script de heartbeat teamspeak
+#  shell: "/bin/bash -x /scripts/teamspeak_heartbeat.sh &"
+#  when: "'docker-cluster' in group_names"
+
+- name: Copiando script dump mysql
+  copy:
+    src: files/dump_mysql.sh
+    dest: /scripts/dump_mysql.sh
+    owner: root
+    group: root
+    mode: '0770'
+  when: "'gestion' in group_names"
+
+- name: Copiando archivo de credenciales
+  template:
+    src: mysql.j2
+    dest: /root/.mysqlpass
+    owner: root
+    group: root
+    mode: '0770'
+  when: "'gestion' in group_names"
+
+- name: Creando el cron del script dump mysql
+  shell: "echo \"0 6 * * * root /bin/bash /scripts/dump_mysql.sh\" >> /etc/crontab"
+  when: "'gestion' in group_names"

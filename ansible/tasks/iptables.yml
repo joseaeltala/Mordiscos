@@ -1,0 +1,7 @@
+- name: Configurando IPTABLES para los hosts
+  vars:
+    firewall_policy_forward: ACCEPT # Politicas por defecto 
+    firewall_policy_output: ACCEPT
+    firewall_policy_input: ACCEPT
+  include_role:
+    name: iptables

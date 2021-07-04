@@ -1,0 +1,102 @@
+#
+# NFS
+###
+nfs_share_mounts:
+    - path: /mnt/certificados/
+      location: 172.16.150.1:/md0/certificados
+    - path: /backups/mysql/
+      location: 172.16.150.1:/md0/backups/mysql
+
+#
+# NFS_EXPORTS
+###
+nfs_exports:
+  - /usr/local/nagios/libexec 172.16.133.0/24(ro,sync,no_subtree_check)
+
+#
+# CERTBOT
+###
+letsencrypt_cert:
+       name: mordiscos
+       domains:
+         - mordiscos.ovh
+         - dns.mordiscos.ovh
+         - ts3.mordiscos.ovh
+         - www.mordiscos.ovh
+         - owncloud.mordiscos.ovh
+         - nagios.mordiscos.ovh
+         - bitbucket.mordiscos.ovh
+       challenge: http
+       http_auth: standalone
+       reuse_key: True
+       services:
+         - apache2
+
+#
+# FIREWALL
+###
+firewall_allowed_tcp_ports:
+  - "22"
+  - "80"
+#
+# DNS SERVER
+###
+bind_zones:
+  mordiscos.ovh:
+    ns_primary: mordiscos.ovh
+    mail: admin@mordiscos.ovh
+    serial: 1
+    ttl: 3600
+    refresh: 14400
+    retry: 86400
+    negative_cache: 86400
+    records:
+      - { name: '@', type: ns, value: mordiscos.ovh. }
+      - { name: dns, type: ns, value: mordiscos.ovh. }
+      - { name: '@', type: a, value: 90.74.64.190 }
+      - { name: dns, type: a, value: 90.74.64.190 }
+      - { name: owncloud, type: cname, value: '@' }
+      - { name: ts3, type: cname, value: '@' }
+      - { name: bitbucket, type: cname, value: '@' }
+      - { name: nagios, type: cname, value: '@' }
+      - { name: www, type: cname, value: '@' }
+  mordiscos.local:
+    ns_primary: mordiscos.local
+    mail: admin@mordiscos.local
+    serial: 2
+    ttl: 3600
+    refresh: 14400
+    retry: 86400
+    negative_cache: 86400
+    records:
+      - { name: '@', type: ns, value: mordiscos.local. }
+      - { name: '@', type: a, value: 172.16.133.1 }
+      - { name: gestion, type: a, value: 172.16.133.1 }
+      - { name: lb-publico-01, type: a, value: 172.16.133.33 }
+      - { name: lb-publico-02, type: a, value: 172.16.133.34 }
+      - { name: manager, type: a, value: 172.16.133.200 }
+      - { name: worker-01, type: a, value: 172.16.133.201 }
+      - { name: worker-02, type: a, value: 172.16.133.202 }
+      - { name: lb-privado-01, type: a, value: 172.16.133.10 }
+      - { name: lb-privado-02, type: a, value: 172.16.133.11 }  
+      - { name: db-privado-01, type: a, value: 172.16.133.251 }
+      - { name: db-privado-02, type: a, value: 172.16.133.252 }   
+      - { name: vip-interno, type: a, value: 172.16.133.12 }
+      - { name: vip-publico, type: a, value: 172.16.133.35 }
+  blueclouds.ovh:
+    ns_primary: blueclouds.ovh
+    mail: admin@blueclouds.ovh
+    serial: 1
+    ttl: 3600
+    refresh: 14400
+    retry: 86400
+    negative_cache: 86400
+    records:
+      - { name: '@', type: ns, value: blueclouds.ovh. }
+      - { name: dns, type: ns, value: blueclouds.ovh. }
+      - { name: '@', type: a, value: 90.74.64.190 }
+      - { name: dns, type: a, value: 90.74.64.190 }
+      - { name: owncloud, type: cname, value: '@' }
+      - { name: bitbucket, type: cname, value: '@' }
+      - { name: nagios, type: cname, value: '@' }
+      - { name: ts3, type: cname, value: '@' }

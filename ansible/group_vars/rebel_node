@@ -1,0 +1,4 @@
+almacenamiento: local
+node: rebel
+api_host: rebel
+node_deploy_password: "{{ password_rebel }}"

@@ -1,0 +1,18 @@
+#
+# PROXMOX
+###
+node_deploy_password: "{{ password_rebel }}"
+
+#
+# NFS_EXPORTS
+###
+nfs_exports:
+  - /var/lib/vz/template/cache 172.16.150.2(rw,sync,no_subtree_check)
+  - /md0/certificados 172.16.133.1(rw,sync,no_subtree_check) 172.16.133.32/30(ro,sync,no_subtree_check) 172.16.150.2/32(ro,sync,no_subtree_check) 
+  - /md0/teamspeak 172.16.133.200/29(rw,sync,no_subtree_check) 
+  - /md0/owncloud 172.16.133.200/29(rw,sync,no_subtree_check) 
+  - /md0/backups/mysql 172.16.133.1(rw,sync,no_subtree_check)
+#
+# IPTABLES
+###
+firewall_policy_input: ACCEPT

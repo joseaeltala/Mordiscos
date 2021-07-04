@@ -1,0 +1,4 @@
+- name: Configurando MYSQL en databases
+  include_role:
+    name: mysql
+

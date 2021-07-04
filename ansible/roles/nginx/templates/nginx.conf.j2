@@ -1,0 +1,71 @@
+load_module /usr/lib/nginx/modules/ngx_stream_module.so;
+user www-data;
+worker_processes {{ ansible_processor_count }};
+pid /run/nginx.pid;
+
+events {
+	worker_connections 768;
+}
+
+stream {
+        server {
+                listen 9987 udp;
+                listen [::]:9987 udp;
+                proxy_pass ts3_stream_backend;
+                proxy_timeout 60s;
+                proxy_responses 0;
+        }
+        upstream ts3_stream_backend {
+                server 10.10.20.200:9987;
+		server 10.10.20.201:9987;
+		server 10.10.20.202:9987;
+        }
+        #TS server file port
+        server {
+                listen 30033;
+                proxy_pass ts3_stream_files;
+        }
+        upstream ts3_stream_files {
+                server 10.10.20.200:30033;
+                server 10.10.20.201:30033;
+                server 10.10.20.202:30033;
+        }
+        server {
+                listen 10011;
+                proxy_pass ts3_stream_server;
+        }
+        upstream ts3_stream_server {
+                server 10.10.20.200:10011;
+                server 10.10.20.201:10011;
+                server 10.10.20.202:10011;
+        }
+
+}
+
+http {
+	sendfile on;
+	tcp_nopush on;
+	tcp_nodelay on;
+	keepalive_timeout 65;
+	types_hash_max_size 2048;
+
+	server_tokens off;
+
+	include /etc/nginx/mime.types;
+	default_type application/octet-stream;
+
+	access_log /var/log/nginx/access.log;
+	error_log /var/log/nginx/error.log;
+
+	gzip on;
+	gzip_vary on;
+	gzip_proxied any;
+	gzip_comp_level 6;
+	gzip_buffers 16 8k;
+	gzip_http_version 1.1;
+	gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript application/javascript;
+
+	include /etc/nginx/conf.d/*.conf;
+	include /etc/nginx/sites-enabled/*;
+
+}

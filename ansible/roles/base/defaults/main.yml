@@ -1,0 +1,5 @@
+---
+mysql_default_daemon: mysqld
+mysql_default_apt_keyserver: pool.sks-keyservers.net
+mysql_default_apt_key_id: 5072E1F5
+mysql_apt_template: mysql.list.j2

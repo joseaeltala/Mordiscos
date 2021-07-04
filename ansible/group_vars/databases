@@ -1,0 +1,50 @@
+mysql_root_password: "{{ password_mysql_root }}"
+
+mysql_databases:
+  - name: teamspeak
+    encoding: utf8
+    collation: utf8_general_ci
+  - name: owncloud
+    encoding: utf8
+    collation: utf8_general_ci
+  - name: bitbucket
+    encoding: utf8mb4
+    collation: utf8mb4_bin
+
+mysql_replication_user_name: replicationuser
+mysql_replication_user_host: "%"
+mysql_replication_user_password: "{{ password_mysql_replicationuser }}"
+mysql_replication_user_priv: "*.*:"
+mysql_users:
+  - name: replicationuser
+    host: "172.16.133.%"
+    password: "{{ password_mysql_replicationuser}}"
+    priv: "*.*:ALL"
+  - name: ts3user
+    host: "172.16.133.%"
+    password: "{{ password_mysql_ts3user }}"
+    priv: "teamspeak.*:ALL"
+  - name: ownclouduser
+    host: "172.16.133.%"
+    password: "{{ password_mysql_ownclouduser }}"
+    priv: "owncloud.*:ALL"
+  - name: bitbucketuser
+    host: "172.16.133.%"
+    password: "{{ password_mysql_bitbucketuser }}"
+    priv: "bitbucket.*:ALL"
+  - name: backupuser
+    host: "172.16.133.%"
+    password: "{{ password_mysql_backupuser }}"
+    priv: "*.*:SELECT,LOCK TABLES,RELOAD,SHOW VIEW,EVENT,TRIGGER"
+mysql_port: 3306
+mysql_bind_address: '0.0.0.0'
+mysql_daemon: mysqld
+mysql_version: 5.7
+mysql_socket: /var/run/mysqld/mysqld.sock
+mysql_replication_master: 'master'
+
+#replicacion
+
+mysql_max_binlog_size: "100M"
+mysql_binlog_format: "ROW"
+mysql_expire_logs_days: "10"

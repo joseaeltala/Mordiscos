@@ -1,0 +1,49 @@
+---
+- name: Extract hostname from inventory_hostname (must be fqdn)
+  set_fact:
+    proxmox_hostname: "{{ inventory_hostname.split('.')[0] }}"
+  tags:
+    - deploy
+    - borrar
+
+# Extraer el número de VM
+- name: Extract the ID of the VM from container var
+  shell: |
+    set -o pipefail
+    pct list | grep -w "{{ proxmox_hostname }}" | cut -f 1 -d ' '
+  args:
+    executable: /bin/bash
+  delegate_to: "{{ api_host }}"
+  register: VMID
+  changed_when: false
+  tags:
+    - deploy
+    - borrar
+
+  # Cambiar estado del contenedor a parado
+- name: Cambiar estado del contenedor
+  proxmox:
+    node: "{{ node }}"
+    api_user: "{{ api_user }}"
+    api_host: "{{ api_host }}"
+    api_password: "{{ node_deploy_password }}"
+    vmid: "{{ VMID.stdout }}"
+    state: "stopped"
+  delegate_to: "{{ api_host }}"
+  tags:
+    - deploy
+    - borrar
+
+  # Cambiar estado del contenedor a parado
+- name: Cambiar estado del contenedor
+  proxmox:
+    node: "{{ node }}"
+    api_user: "{{ api_user }}"
+    api_host: "{{ api_host }}"
+    api_password: "{{ node_deploy_password }}"
+    vmid: "{{ VMID.stdout }}"
+    state: "absent"
+  delegate_to: "{{ api_host }}"
+  tags:
+    - deploy
+    - borrar

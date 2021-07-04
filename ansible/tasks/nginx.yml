@@ -1,0 +1,3 @@
+- name: Configurando servidor NGINX
+  include_role: 
+    name: nginx

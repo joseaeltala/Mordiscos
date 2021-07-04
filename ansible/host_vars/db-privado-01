@@ -1,0 +1,20 @@
+#####################
+#      PROXMOX      #
+#####################
+idlxc: "208"
+net_interfaces:
+  - id: "net0"
+    name: "eth0"
+    ip4: "172.16.133.251"
+    netmask4: "16"
+    gw4: "172.16.0.1"
+    bridge: "vmbr0"
+cores: "1"
+memory: "512"
+disk: "32"
+
+#
+# MySQL
+###
+mysql_server_id: "1"
+mysql_replication_role: 'master'

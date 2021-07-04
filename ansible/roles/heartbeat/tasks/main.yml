@@ -1,0 +1,67 @@
+---
+- name: Apt update
+  apt:
+    update_cache: yes
+- block:
+
+    - name: disable apt package lock
+      command: "apt-mark unhold {{ item }}"
+      loop: "{{ [heartbeat_package_names] | flatten }}"
+      when: ansible_os_family == 'Debian'
+
+  when: heartbeat_package_hold | bool
+  ignore_errors: yes
+
+- name: install heartbeat packages
+  package:
+    name: "{{ heartbeat_package_names }}"
+    state: "{{ heartbeat_package_state }}"
+
+- block:
+
+    - name: enable apt package hold
+      command: "apt-mark hold {{ item }}"
+      loop: "{{ [heartbeat_package_names] | flatten }}"
+      when:
+        - ansible_os_family == 'Debian'
+
+  when: heartbeat_package_hold | bool
+
+- name: configure authkey
+  template:
+    src: "{{ heartbeat_authkey_file }}"
+    dest: "{{ heartbeat_authkey_path }}"
+    owner: root
+    group: root
+    mode: 0600
+  notify: restart heartbeat
+  when:
+    - heartbeat_authkey_file is defined
+
+- name: configure heartbeat
+  template:
+    src: "{{ heartbeat_conf_file }}"
+    dest: "{{ heartbeat_conf_path }}"
+    owner: root
+    group: root
+    mode: 0600
+  notify: restart heartbeat
+  when:
+    - heartbeat_conf_file is defined
+
+- name: configure haresources
+  template:
+    src: "{{ heartbeat_haresources_file }}"
+    dest: "{{ heartbeat_haresources_path }}"
+    owner: root
+    group: root
+    mode: 0600
+  notify: restart heartbeat
+  when:
+    - heartbeat_haresources_file is defined
+
+- name: manage heartbeat services
+  service:
+    name: "{{ heartbeat_service_name }}"
+    state: "{{ heartbeat_service_status }}"
+    enabled: "{{ heartbeat_service_enabled }}"

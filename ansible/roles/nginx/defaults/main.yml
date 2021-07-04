@@ -1,0 +1,7 @@
+---
+#nginx_version: "stable"
+nginx_delete_default_site: False
+nginx_port: 9987  
+nginx_protocol: udp
+nginx_server_name: ts3.mordiscos.ovh
+nginx_ip_proxy: 10.10.20.200

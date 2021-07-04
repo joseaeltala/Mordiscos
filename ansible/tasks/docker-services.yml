@@ -1,0 +1,51 @@
+  - name: Creacion del servicio owncloud
+    docker_swarm_service:
+      replicas: 3
+      name: owncloud
+      image: owncloud
+      mounts:
+        - source: /mnt/owncloud
+          target: /var/www/html
+          type: bind
+      publish:
+        - mode: host
+          protocol: tcp
+          published_port: 8080
+          target_port: 80
+  - name: Creacion del servicio teamspeak
+    docker_swarm_service:
+      name: teamspeak
+      image: joseaeltala/teamspeak
+      replicas: 3
+      mounts:
+        - source: /mnt/teamspeak/files
+          target: /teamspeak/files
+          type: bind
+        - source: /mnt/teamspeak/logs
+          target: /teamspeak/logs
+          type: bind
+      command: "/bin/bash /teamspeak/start.sh"
+      publish:
+        - mode: host
+          protocol: udp
+          published_port: 9987
+          target_port: 9987
+        - mode: host
+          protocol: tcp
+          published_port: 10011
+          target_port: 10011
+        - mode: host
+          protocol: tcp 
+          published_port: 30033
+          target_port: 30033
+      secrets:
+        - secret_name: "TS3SERVER_DB_PASSWORD"
+          filename: /run/secrets/ts3user_db_password
+      env:
+        TS3SERVER_DB_PLUGIN: ts3db_mariadb
+        TS3SERVER_DB_HOST: 172.16.133.12
+        TS3SERVER_DB_PORT: "3306"
+        TS3SERVER_DB_USER: ts3user
+        TS3SERVER_DB_PASSWORD_FILE: /run/secrets/ts3user_db_password
+        TS3SERVER_DB_NAME: teamspeak
+        TS3SERVER_LICENSE: accept

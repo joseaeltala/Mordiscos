@@ -1,0 +1,42 @@
+---
+- name: Install Nginx
+  apt: 
+    name: nginx 
+    state: present
+    update_cache: yes
+
+- name: Delete default site-enabled
+  file: 
+    path: /etc/nginx/sites-enabled/default 
+    state: absent
+  notify: 
+    - restart nginx
+
+- name: Delete default site-available
+  file: 
+    path: /etc/nginx/sites-available/default 
+    state: absent
+  notify: 
+    - restart nginx
+
+- name: Delete default web root
+  file: 
+    path: /var/www/html 
+    state: absent
+
+#- name: Check Nginx Upstart service definition exists
+#  stat: 
+#    path: /etc/init/nginx.conf
+#  register: nginx_upstart
+
+#- name: Configure Nginx log rotation
+#  template: 
+#    src: logrotate_nginx.j2 
+#    dest: /etc/logrotate.d/nginx
+#  when: nginx_upstart.stat.exists
+
+- name: Configure Nginx
+  template: 
+    src: templates/nginx.conf.j2 
+    dest: /etc/nginx/nginx.conf
+  notify: restart nginx

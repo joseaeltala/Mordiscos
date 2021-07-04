@@ -1,0 +1,8 @@
+- hosts: infraestructura
+  tasks:
+    - include: tasks/docker-services.yml
+      when: "'manager' in inventory_hostname"
+      tags:
+        - docker
+        - dockerswarm
+        - docker-services

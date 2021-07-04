@@ -1,0 +1,34 @@
+haproxy_frontend:
+  - name: mysql
+    description: Tráfico mysql
+    mode: tcp
+    bind:
+      - listen: "0.0.0.0:3306"
+    default_backend: mysqlservers
+
+haproxy_backend:
+  - name: mysqlservers
+    balance: first
+    mode: tcp
+    server:
+      - name: db-privado-01
+        listen: "172.16.133.251:3306"
+        param:
+          - check
+      - name: db-privado-02
+        listen: "172.16.133.252:3306"
+        param:
+          - check
+          - backup
+
+#
+## HEARTBEAT
+####
+heartbeat_nodo_principal: lb-privado-01
+heartbeat_nodos_secundarios:
+  - lb-privado-02
+heartbeat_vip: 172.16.133.12
+heartbeat_vip_netmask: 16
+heartbeat_vip_interface: eth0
+
+

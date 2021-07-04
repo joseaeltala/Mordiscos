@@ -1,0 +1,15 @@
+heartbeat_package_names: heartbeat
+heartbeat_package_state: latest
+heartbeat_package_hold: no
+heartbeat_service_name: heartbeat
+heartbeat_service_status: started
+heartbeat_service_enabled: yes
+heartbeat_conf_manage: yes
+heartbeat_conf_path: /etc/ha.d/ha.cf
+heartbeat_conf_file: ha.cf.j2
+heartbeat_haresources_path: /etc/ha.d/haresources
+heartbeat_haresources_file: haresources.j2
+heartbeat_authkey_path: /etc/ha.d/authkeys
+heartbeat_authkey_file: authkeys.j2
+heartbeat_repo_manage: yes
+

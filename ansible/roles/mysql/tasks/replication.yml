@@ -1,0 +1,35 @@
+- name: Stop slave
+  mysql_replication:
+    login_user: root
+    login_password: "{{ password_mysql_root }}"
+    mode: stopslave
+  when: mysql_replication_role == 'slave'
+
+- name: Comprobacion del maestro
+  mysql_replication:
+    mode: getmaster
+    login_user: root
+    login_password: "{{ password_mysql_root }}"
+  register: master
+  when: mysql_replication_role == 'master'
+
+- name: Configure replication on the slave
+  mysql_replication:
+    mode: changemaster
+    master_host: db-privado-01
+    master_user: replicationuser
+    master_password: "{{ password_mysql_replicationuser }}"
+    master_log_file: "{{ hostvars['db-privado-01']['master'].File }}"
+    master_log_pos: "{{ hostvars['db-privado-01']['master'].Position }}"
+    login_user: root
+    login_password: "{{ password_mysql_root }}"
+  when: mysql_replication_role == 'slave'
+
+- name: Start replication
+  mysql_replication:
+    mode: startslave
+    login_user: root
+    login_password: "{{ password_mysql_root }}"
+  when: mysql_replication_role == 'slave'
+
+   

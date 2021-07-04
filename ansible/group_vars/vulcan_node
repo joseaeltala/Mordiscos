@@ -1,0 +1,4 @@
+almacenamiento: data
+node: vulcan
+api_host: vulcan
+node_deploy_password: "{{ password_vulcan }}"

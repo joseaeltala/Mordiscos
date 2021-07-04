@@ -1,0 +1,11 @@
+#
+# PROXMOX
+###
+node_deploy_password: "{{ password_vulcan }}"
+
+firewall_policy_input: ACCEPT
+# NFS_MOUNT
+###
+nfs_share_mounts:
+    - path: /mnt/pve/data/template/cache/
+      location: 172.16.150.1:/var/lib/vz/template/cache

@@ -1,0 +1,70 @@
+---
+# defaults file for ansible-role-proxmox-create-lxc/
+# vars needed to define the parameters for the wraped proxmox api
+
+node: rebel
+api_host: rebel
+api_user: root@pam
+#node_deploy_password: "{{ proxmox_password }}"
+template: debian-9.0-standard_9.7-1_amd64.tar.gz
+nesting: 0
+# unprivileged: true    # Optional.
+cores: 1
+# cpu_limit: 1          # Optional.
+# cpu_units: 1000       # Optional.
+memory: 512
+# swap: 512             # Optional.
+disk: 32
+storage: local
+nameserver: 8.8.8.8
+## Better put this in a vault
+root_password: "{{ password_maquinas }}"
+storage: local
+## Start the container when node boot. It is recommended setting in 'yes' when container is in production
+onboot: yes
+
+#net_interfaces:
+#  - id: net0
+#    name: eth0
+#    hwaddr: F6:A2:69:61:94:8D   # Optional. If not indicated, Proxmox will assign one automatically.
+#    ip4: 172.16.213.31          # Optional. Available options: valid IPv4 address (to use static) - dhcp (to use DHCP)
+#    netmask4: 16                # Optional if IPv4 not indicated.
+#    gw4: 172.16.0.1           # Optional.
+#    ip6: 200:db8::10            # Optional. Available options: valid IPv6 address (to use static) - dhcp (to use DHCP) - auto (to use SLAAC)
+#    netmask6: 64                # Optional if IPv6 not indicated.
+#    gw6: 200:db8::1             # Optional.
+#    bridge: vmbr0
+#    firewall: false             # Optional. # Setting netif_firewall in TRUE, enable the use of firewall on the network interface
+#    rate_limit: 5               # Optional. (In MB/s)
+#    vlan_tag: 200               # Optional.
+#  - id: net1
+#    name: eth1
+#    ip6: 200:db8::10
+#    netmask6: 64
+#    bridge: vmbr1
+
+mounts: []  # No aditional mount points by default
+#   - id: mp0
+#     storage: local-lvm
+#     size: 16
+#     mount_point: "/mnt/data"
+#     acl: false                     # Optional.
+#     quota: false                   # Optional.
+#     backup: false                  # Optional.
+#     skip_replication: false        # Optional.
+#     read_only: false               # Optional.
+#   - id: mp1
+#     storage: local-lvm
+#     size: 8
+#     mount_point: "/mnt/logs"
+
+# You can change the timeout for the operations of the module according to the performance of your remote host
+# proxmox_create_lxc_timeout: 30 
+
+# Additional "manual" settings to add to the file /etc/pve/nodes/{{ node }}/lxc/{{ VMID }}.conf
+pve_additional_conf: []
+        # Kernel modules available within the LXC
+  # - 'mp0: /lib/modules/4.15.18-9-pve,mp=/lib/modules/4.15.18-9-pve,ro=1'
+        # tun device for OpenVPN server inside LXC
+  # - 'lxc.cgroup.devices.allow = c 10:200 rwm'
+  # - 'lxc.hook.autodev = sh -c "modprobe tun; cd ${LXC_ROOTFS_MOUNT}/dev; mkdir net; mknod net/tun c 10 200; chmod 0666 net/tun"'

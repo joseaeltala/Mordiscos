@@ -1,0 +1,68 @@
+#!/bin/bash
+# iptables firewall.
+#
+# This file should be located at /etc/firewall.bash, and is meant to work with
+# the `geerlingguy.firewall` Ansible role.
+#
+# Common port reference:
+#   22: SSH
+#   25: SMTP
+#   80: HTTP
+#   123: NTP
+#   443: HTTPS
+#   2222: SSH alternate
+#   8080: HTTP alternate
+#
+# @author Jeff Geerling
+
+# Politicas por defecto
+iptables -P INPUT {{ firewall_policy_input }}
+iptables -P OUTPUT {{ firewall_policy_output  }}
+iptables -P FORWARD {{ firewall_policy_forward }}  
+
+# Open ports.
+{# Add a rule for each open port #}
+{% for port in firewall_allowed_tcp_ports %}
+iptables -A INPUT -p tcp -m tcp --dport {{ port }} -j ACCEPT
+{% endfor %}
+{% for port in firewall_allowed_udp_ports %}
+iptables -A INPUT -p udp -m udp --dport {{ port }} -j ACCEPT
+{% endfor %}
+
+# Accept traffic from loopback interface (localhost).
+iptables -A INPUT -i lo -j ACCEPT
+iptables -A INPUT -s 172.16.150.1 -j ACCEPT
+iptables -A INPUT -s 172.16.150.2 -j ACCEPT
+
+# Habilitar ip_forward y MASQUERADE para la red interna de la infraestructura
+{% if firewall_gw %}
+sed -i 's/^#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/g' /etc/sysctl.conf
+echo 1 > /proc/sys/net/ipv4/ip_forward 
+iptables -t nat -A POSTROUTING -o {{ firewall_gw_interface }} -j MASQUERADE 
+{% endif %}
+
+# Forwarded ports.
+{# Add a rule for each forwarded port #}
+{% for forwarded_port in firewall_forwarded_tcp_ports %}
+iptables -t nat -I PREROUTING -p tcp --dport {{ forwarded_port.src }} -j REDIRECT --to-port {{ forwarded_port.dest }}
+iptables -t nat -I OUTPUT -p tcp -o lo --dport {{ forwarded_port.src }} -j REDIRECT --to-port {{ forwarded_port.dest }}
+{% endfor %}
+{% for forwarded_port in firewall_forwarded_udp_ports %}
+iptables -t nat -I PREROUTING -p udp --dport {{ forwarded_port.src }} -j REDIRECT --to-port {{ forwarded_port.dest }}
+iptables -t nat -I OUTPUT -p udp -o lo --dport {{ forwarded_port.src }} -j REDIRECT --to-port {{ forwarded_port.dest }}
+{% endfor %}
+
+# Accept icmp ping requests.
+iptables -A INPUT -p icmp -j ACCEPT
+
+# Allow NTP traffic for time synchronization.
+iptables -A OUTPUT -p udp --dport 123 -j ACCEPT
+iptables -A INPUT -p udp --sport 123 -j ACCEPT
+
+# Additional custom rules.
+{% for rule in firewall_additional_rules %}
+{{ rule }}
+{% endfor %}
+
+# Allow established connections:
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT

@@ -1,0 +1,4 @@
+- name: Exportando directorios por NFS
+  include_role:
+    name: nfs_exports 
+

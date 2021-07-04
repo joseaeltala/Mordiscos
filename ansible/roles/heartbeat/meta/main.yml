@@ -1,0 +1,20 @@
+---
+galaxy_info:
+  role_name: heartbeat
+  author: Ted Cook
+  description: An Ansible role to install and configure heartbeat
+  license: MIT
+  min_ansible_version: 2.7
+  platforms:
+    - name: EL
+      versions:
+        - 7
+    - name: Ubuntu
+      versions:
+        - bionic
+        - xenial
+    - name: Debian
+      versions:
+        - stretch
+  galaxy_tags:
+    - heartbeat

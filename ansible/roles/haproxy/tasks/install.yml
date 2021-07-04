@@ -1,0 +1,25 @@
+# tasks file
+---
+- name: install | dependencies (pre)
+  apt:
+    name: "{{ haproxy_dependencies_pre }}"
+    state: "{{ apt_install_state | default('latest') }}"
+    update_cache: true
+    cache_valid_time: "{{ apt_update_cache_valid_time | default(3600) }}"
+  tags:
+    - haproxy-repository-install-dependencies
+
+- name: install | dependencies
+  apt:
+    name: "{{ item.name }}"
+    state: "{{ item.state }}"
+  with_items: "{{ haproxy_dependencies }}"
+  tags:
+    - haproxy-install-dependencies
+
+- name: install | additional
+  apt:
+    name: "{{ haproxy_install }}"
+    state: "{{ apt_install_state | default('latest') }}"
+  tags:
+    - haproxy-install-additional

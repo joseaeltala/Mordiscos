@@ -1,0 +1,7 @@
+---
+#- name: ip present
+#  wait_for:
+#    port: "{{ handler_port_present }}"  
+#    host: "{{ handler_ip_present }}"
+#    state: started
+#    delay: 4

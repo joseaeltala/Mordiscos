@@ -1,0 +1,10 @@
+- name: Creando certificados para los dominios
+  include_role:
+     name: certbot_centralized
+  when: '"certbot" in group_names'
+
+- name: Aplicando el rol haproxy para reiniciar el servicio en los balanceadores publicos
+  include_role:
+     name: haproxy
+  when: '"balanceadores-publicos" in group_names'
+

@@ -1,0 +1,14 @@
+# tasks file
+---
+- name: configuration | update file
+  template:
+    src: "{{ haproxy_conf_template }}"
+    dest: /etc/haproxy/haproxy.cfg
+    owner: root
+    group: root
+    mode: 0640
+    validate: 'haproxy -f %s -c'
+  notify: restart haproxy
+  tags:
+    - haproxy-configuration-update-file
+    - haproxy-restart

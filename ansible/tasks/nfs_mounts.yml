@@ -1,0 +1,5 @@
+- name: Creando montajes NFS
+  vars:
+    nfs_version: 4
+  include_role:
+    name: nfs_mount

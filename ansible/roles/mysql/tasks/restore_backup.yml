@@ -1,0 +1,33 @@
+- name: Registrando variable último backup
+  shell: "find /backups/mysql/ -type f | sort -r | head -n 1 | cut -d\"/\" -f 4"
+  register: "lastbackup"
+  when: "'gestion' in group_names"
+
+- name: Mensaje
+  debug:
+    msg: "{{ hostvars['gestion']['lastbackup'].stdout }}"
+
+- name: Copiando última copia de seguridad a db-privado-01
+  copy:
+    src: "/backups/mysql/{{ hostvars['gestion']['lastbackup'].stdout }}"
+    dest: "/root/"
+  when: "'db-privado-01' in inventory_hostname"
+
+- name: Extrayendo backup
+  shell: "tar xvfz /root/{{ hostvars['gestion']['lastbackup'].stdout }}"
+  when: "'db-privado-01' in inventory_hostname"
+
+- name: Restaurando copia de seguridad
+  shell: "mysql -u root -p{{ password_mysql_root }} < /root/all_databases.sql"
+  when: "'db-privado-01' in inventory_hostname"
+
+- name: Borrando ficheros residuales
+  file:
+      path: "{{ item  }}"
+      state: absent
+  with_items:
+    - "/root/{{ hostvars['gestion']['lastbackup'].stdout }}"
+    - "/root/all_databases.sql"
+  when: "'db-privado-01' in inventory_hostname"
+
+

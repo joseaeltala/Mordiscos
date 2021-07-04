@@ -1,0 +1,24 @@
+---
+firewall_state: started
+firewall_enabled_at_boot: true
+firewall_flush_rules_and_chains: false
+
+firewall_allowed_tcp_ports:
+  - "22"
+firewall_allowed_udp_ports: []
+firewall_forwarded_tcp_ports: []
+firewall_forwarded_udp_ports: []
+
+firewall_additional_rules: []
+
+# Set to true to ensure other firewall management software is disabled.
+firewall_disable_firewalld: false
+firewall_disable_ufw: false
+
+#Politicas por defecto que se usará en las máquinas que se aplicará el firewall
+firewall_policy_input: ACCEPT
+firewall_policy_output: ACCEPT
+firewall_policy_forward: ACCEPT 
+
+firewall_gw: false
+firewall_gw_interface: eth1

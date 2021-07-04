@@ -1,0 +1,18 @@
+bcast eth0
+
+keepalive 2
+
+warntime 5
+
+deadtime 10
+
+udpport 694
+auto_failback on
+
+#Nodo principal
+node {{ heartbeat_nodo_principal }}
+
+#Nodos que entrarán en acción si se cae el nodo principal
+{% for nodo in heartbeat_nodos_secundarios %}
+node {{ nodo }}
+{% endfor %}

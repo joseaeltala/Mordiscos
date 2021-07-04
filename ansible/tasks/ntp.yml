@@ -1,0 +1,5 @@
+- name: Sincronizando los relojes con un ntp server
+  vars:
+          ntp_timezone: Europe/Madrid
+  include_role:
+    name: ntp

@@ -1,0 +1,9 @@
+- name: Borrando los contenedores en los nodos de proxmox
+  vars:
+        pool: Mordiscos
+        estado: absent #present, absent, stopped, started, restarted
+  include_role:
+    name: proxmox_lxc
+  tags:
+    - borrar
+

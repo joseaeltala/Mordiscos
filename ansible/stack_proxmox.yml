@@ -1,0 +1,39 @@
+#################
+# LISTA DE TAGS #
+#################
+# proxmox/infraestructura: Lanza todas las máquinas en el grupo infraestructura en los distintos nodos tal y como viene en el diagrama
+# borrar: Borra las maquinas que se indiquen en este archivo ¡¡ NO BORRAR GESTION!!
+#
+#
+##################
+# LISTA DE HOSTS #
+#################
+#- hosts: rebel_node
+#- hosts: vulcan_node
+#- hosts: balanceadores
+#- hosts: balanceadores-privados
+#- hosts: balanceadores-publicos
+#- hosts: dns-server
+#- hosts: databases
+#- hosts: docker-cluster
+#- hosts: lb-publico-02
+#- hosts: lb-privado-01
+#- hosts: docker-workers
+#- hosts: db-privado-01
+#- hosts: rebel_node
+#- hosts: vulcan_node
+- hosts: infraestructura
+#- hosts: nfs
+#- hosts: db-privado-01
+  gather_facts: no
+  tasks:
+    - include: tasks/proxmox.yml
+      when: "'infraestructura' in group_names and 'gestion' not in group_names"
+      tags:
+        - proxmox
+        - infraestructura
+        - estado
+    - include: tasks/proxmox_borrar.yml
+      when: "'infraestructura' in group_names and 'gestion' not in group_names"
+      tags:
+        - borrar

@@ -1,0 +1,67 @@
+---
+
+- name: Create a custom Swarm network.
+  docker_network:
+    name: docker_gwbridge
+    driver_options:
+      com.docker.network.bridge.enable_icc: "false"
+      com.docker.network.bridge.enable_ip_masquerade: "true"
+      com.docker.network.bridge.name: docker_gwbridge
+    ipam_options:
+      subnet: "{{ docker_swarm_network }}"
+      gateway: "{{ docker_swarm_network | ipaddr('net') | ipaddr('1') | ipaddr('ip') }}"
+  when: docker_swarm_network is defined and docker_swarm_network | ipaddr('net')
+
+- name: Check if "Swarm Mode" is enabled.
+  shell: docker info
+  changed_when: false
+  register: docker_info
+  tags:
+    - skip_ansible_lint  # Suppressing the linter
+
+- name: Init "Swarm Mode" on the first manager.
+  shell: docker swarm init
+        --listen-addr {{ docker_swarm_addr }}:{{ docker_swarm_port }}
+        --advertise-addr {{ docker_swarm_addr }}
+  when: "'docker_swarm_manager' in group_names"
+
+- name: Get the worker join-token.
+  shell: docker swarm join-token -q worker
+  changed_when: false
+  register: docker_worker_token
+  when: "'docker_swarm_manager' in group_names"
+
+- name: Get the manager join-token.
+  shell: docker swarm join-token -q manager
+  register: docker_manager_token
+  when: "'docker_swarm_manager' in group_names"
+
+- name: Declare the address of the first Swarm manager as a fact.
+  set_fact:
+    docker_manager_address: "{{ docker_swarm_addr }}:{{ docker_swarm_port }}"
+  when: "inventory_hostname == groups['docker_swarm_manager'][0]"
+
+- name: Join the pending Swarm worker nodes.
+  shell: docker swarm join
+        --listen-addr {{ docker_swarm_addr }}:{{ docker_swarm_port }}
+        --advertise-addr {{ docker_swarm_addr }}
+        --token "{{ hostvars['manager']['docker_worker_token'].stdout }}"
+        {{ docker_manager_address }}
+  when: "'docker_swarm_worker' in {{ group_names}} and 'docker_swarm_manager' not in {{ group_names}} " 
+
+#- name: Join the pending Swarm manager nodes.
+#  shell: docker swarm join
+#        --listen-addr {{ docker_swarm_addr }}:{{ docker_swarm_port }}
+#        --advertise-addr {{ docker_swarm_addr }}
+#        --token "{{ hostvars['manager']['docker_manager_token'].stdout }}"
+#        {{ docker_manager_address }}
+#  changed_when: false
+#  when: "'docker_swarm_worker' in group_names"
+
+- name: Creando los secrets de teamspeak
+  shell: "printf {{ password_mysql_ts3user }} | docker secret create TS3SERVER_DB_PASSWORD -"
+  when: "'docker-manager' in group_names"
+
+- name: Creando los secrets de owncloud
+  shell: "printf {{ password_mysql_ownclouduser }} | docker secret create OWNCLOUD_DB_PASSWORD -"
+  when: "'docker-manager' in group_names"

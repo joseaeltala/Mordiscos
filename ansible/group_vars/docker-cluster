@@ -1,0 +1,19 @@
+#
+# NFS_MOUNT
+###
+nfs_share_mounts:
+    - path: /mnt/owncloud/
+      location: 172.16.150.1:/md0/owncloud/
+    - path: /mnt/teamspeak
+      location: 172.16.150.1:/md0/teamspeak/
+#
+## HEARTBEAT
+####
+heartbeat_nodo_principal: manager
+heartbeat_nodos_secundarios:
+  - worker-01
+  - worker-02
+heartbeat_vip: 172.16.133.36
+heartbeat_vip_netmask: 16
+heartbeat_vip_interface: eth0
+
